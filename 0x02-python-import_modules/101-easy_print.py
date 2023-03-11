@@ -1,2 +1,2 @@
 #!/usr/bin/python3
-import py_fun
+import python_for_me
