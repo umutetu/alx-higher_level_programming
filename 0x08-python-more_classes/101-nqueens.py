@@ -1,107 +1,86 @@
 #!/usr/bin/python3
-"""
-
-This module contains an algorithm that resolves the N-Queen puzzle
-using backtracking
-
-"""
 
 
-def isSafe(m_queen, nqueen):
-    """ Method that determines if the queens can or can't kill each other
+class QueenChessBoard:
+    def __init__(self, size):
+        self.size = size
+        self.columns = []
 
-    Args:
-        m_queen: array that has the queens positions
-        nqueen: queen number
+    def place_in_next_row(self, column):
+        self.columns.append(column)
 
-    Returns:
-        True: when queens can't kill each other
-        False: when some of the queens can kill
+    def remove_in_current_row(self):
+        return self.columns.pop()
 
-    """
+    def is_this_column_safe_in_next_row(self, column):
+        row = len(self.columns)
+        for queen_column in self.columns:
+            if column == queen_column:
+                return False
 
-    for i in range(nqueen):
+        for queen_row, queen_column in enumerate(self.columns):
+            if queen_column - queen_row == column - row:
+                return False
 
-        if m_queen[i] == m_queen[nqueen]:
-            return False
+        for queen_row, queen_column in enumerate(self.columns):
+            if ((self.size - queen_column) - queen_row ==
+               (self.size - column) - row):
+                return False
 
-        if abs(m_queen[i] - m_queen[nqueen]) == abs(i - nqueen):
-            return False
+        return True
 
-    return True
-
-
-def print_result(m_queen, nqueen):
-    """ Method that prints the list with the Queens positions
-
-    Args:
-        m_queen: array that has the queens positions
-        nqueen: queen number
-
-    """
-
-    res = []
-
-    for i in range(nqueen):
-        res.append([i, m_queen[i]])
-
-    print(res)
+    def display(self):
+        lista = []
+        for row in range(self.size):
+            for column in range(self.size):
+                if column == self.columns[row]:
+                    lista.append([row, column])
+        print(lista, end='')
 
 
-def Queen(m_queen, nqueen):
-    """ Recursive function that executes the Backtracking algorithm
+def solve_queen(size):
+    board = QueenChessBoard(size)
+    number_of_solutions = 0
+    row = 0
+    column = 0
 
-    Args:
-        m_queen: array that has the queens positions
-        nqueen: queen number
+    while True:
+        while column < size:
+            if board.is_this_column_safe_in_next_row(column):
+                board.place_in_next_row(column)
+                row += 1
+                column = 0
+                break
+            else:
+                column += 1
 
-    """
+        if (column == size or row == size):
+            if row == size:
+                board.display()
+                print()
+                number_of_solutions += 1
+                board.remove_in_current_row()
+                row -= 1
 
-    if nqueen is len(m_queen):
-        print_result(m_queen, nqueen)
-        return
+            try:
+                prev_column = board.remove_in_current_row()
+            except IndexError:
+                break
 
-    m_queen[nqueen] = -1
+            row -= 1
+            column = 1 + prev_column
 
-    while((m_queen[nqueen] < len(m_queen) - 1)):
-
-        m_queen[nqueen] += 1
-
-        if isSafe(m_queen, nqueen) is True:
-
-            if nqueen is not len(m_queen):
-                Queen(m_queen, nqueen + 1)
-
-
-def solveNQueen(size):
-    """ Function that invokes the Backtracking algorithm
-
-    Args:
-        size: size of the chessboard
-
-    """
-
-    m_queen = [-1 for i in range(size)]
-
-    Queen(m_queen, 0)
-
-
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     import sys
 
-    if len(sys.argv) == 1 or len(sys.argv) > 2:
+    if len(sys.argv) != 2:
         print("Usage: nqueens N")
         sys.exit(1)
-
-    try:
-        size = int(sys.argv[1])
-    except:
+    if sys.argv[1].isdigit() is False:
         print("N must be a number")
         sys.exit(1)
-
-    if size < 4:
+    if int(sys.argv[1]) < 4:
         print("N must be at least 4")
         sys.exit(1)
 
-    solveNQueen(size)
+    solve_queen(int(sys.argv[1]))
